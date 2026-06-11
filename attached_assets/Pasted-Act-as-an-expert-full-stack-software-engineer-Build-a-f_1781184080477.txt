@@ -1,0 +1,31 @@
+Act as an expert full-stack software engineer. Build a fully working, production-ready Library Management System (LMS) within this Replit environment. Because I am using a free-tier Replit account, you must optimize for ultra-lightweight, zero-cost, and high-performance technologies. 
+
+### Tech Stack Constraints (Strictly enforced for Free Tier):
+- Backend: Python with Flask (lightweight, minimal memory footprint).
+- Database: SQLite (local file-based, 100% free, no setup needed).
+- Frontend: Clean HTML5, standard JavaScript (no complex build steps), and Tailwind CSS pulled via CDN for a highly professional UI without high resource consumption.
+
+Please build out the complete application containing all the following integrated modules:
+
+1. DATABASE SCHEMA & APP SETUP
+- Initialize an SQLite database ('library.db') with tables for: Users (id, name, email, password_hash, role ['Admin', 'Student']), Books (id, title, author, isbn, category, quantity), Transactions (id, user_id, book_id, issue_date, return_date, actual_return_date, fine_amount), and Notifications (id, user_id, message, is_read, timestamp).
+
+2. USER AUTHENTICATION & ROLE MANAGEMENT
+- Secure Login and Registration systems using password hashing (werkzeug.security).
+- Role-based routing: Ensure 'Students' only access student features, and 'Admins' have exclusive access to the Admin Panel. 
+
+3. BOOK INVENTORY & SEARCH
+- Admin capability to Add, Update, and Delete books.
+- Live Search & Filters: A search bar on the dashboard to filter books by Title, Author, or Category.
+
+4. ISSUE / RETURN & FINE MANAGEMENT
+- A workflow allowing students to request/issue a book (decreasing available book quantity by 1).
+- A return workflow (increasing quantity by 1). 
+- Calculate fines automatically: If the current date passes the 'return_date', automatically calculate a fine ($1/day) and display it on the user's profile.
+
+5. DASHBOARD & REPORTS (FRONTEND UI)
+- Create a beautiful, modern, responsive Tailwind CSS dashboard wrapper split into two views based on role:
+  * Admin View: Displays total books, active rentals, total fines collected, user management table (view/delete students), and an automated system log report.
+  * Student View: Displays books currently borrowed, due dates, outstanding fines, and an in-app Notification center alerting them of upcoming or overdue returns.
+
+Please generate all necessary files (app.py, database.py, models.py, and templates inside a /templates folder), wire up the logic completely, and provide clear notification text when the application is ready to run. Ensure no placeholders or 'todo' comments are left behind. Let's build the entire application now.

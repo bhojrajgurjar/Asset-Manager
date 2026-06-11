@@ -1,22 +1,33 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Library Management System API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication
+  - name: books
+    description: Book inventory
+  - name: transactions
+    description: Issue and return books
+  - name: users
+    description: User management
+  - name: notifications
+    description: Notifications
+  - name: dashboard
+    description: Dashboard summaries
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +35,371 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterInput"
+      responses:
+        "201":
+          description: Registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Bad request
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Unauthorized
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+
+  /books:
+    get:
+      operationId: listBooks
+      tags: [books]
+      summary: List all books
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: category
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of books
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Book"
+    post:
+      operationId: createBook
+      tags: [books]
+      summary: Add a new book (Admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Book"
+
+  /books/{id}:
+    get:
+      operationId: getBook
+      tags: [books]
+      summary: Get a single book
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Book
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Book"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateBook
+      tags: [books]
+      summary: Update a book (Admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Book"
+    delete:
+      operationId: deleteBook
+      tags: [books]
+      summary: Delete a book (Admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /books/categories:
+    get:
+      operationId: listCategories
+      tags: [books]
+      summary: List all unique book categories
+      responses:
+        "200":
+          description: Categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+  /transactions:
+    get:
+      operationId: listTransactions
+      tags: [transactions]
+      summary: List all transactions (Admin only)
+      responses:
+        "200":
+          description: Transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transaction"
+
+  /transactions/my:
+    get:
+      operationId: listMyTransactions
+      tags: [transactions]
+      summary: Get current user's transactions
+      responses:
+        "200":
+          description: My transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transaction"
+
+  /transactions/issue:
+    post:
+      operationId: issueBook
+      tags: [transactions]
+      summary: Issue a book to current user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IssueInput"
+      responses:
+        "201":
+          description: Issued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+        "400":
+          description: Book not available
+
+  /transactions/{id}/return:
+    post:
+      operationId: returnBook
+      tags: [transactions]
+      summary: Return a book
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: List all users (Admin only)
+      responses:
+        "200":
+          description: Users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+
+  /users/{id}:
+    delete:
+      operationId: deleteUser
+      tags: [users]
+      summary: Delete a user (Admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /notifications:
+    get:
+      operationId: listNotifications
+      tags: [notifications]
+      summary: Get current user's notifications
+      responses:
+        "200":
+          description: Notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Notification"
+
+  /notifications/{id}/read:
+    patch:
+      operationId: markNotificationRead
+      tags: [notifications]
+      summary: Mark notification as read
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Notification"
+
+  /notifications/read-all:
+    patch:
+      operationId: markAllNotificationsRead
+      tags: [notifications]
+      summary: Mark all notifications as read
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /dashboard/admin:
+    get:
+      operationId: getAdminDashboard
+      tags: [dashboard]
+      summary: Admin dashboard stats
+      responses:
+        "200":
+          description: Admin dashboard data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminDashboard"
+
+  /dashboard/student:
+    get:
+      operationId: getStudentDashboard
+      tags: [dashboard]
+      summary: Student dashboard stats
+      responses:
+        "200":
+          description: Student dashboard data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentDashboard"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +407,219 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required: [message]
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [Admin, Student]
+        createdAt:
+          type: string
+      required: [id, name, email, role, createdAt]
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        message:
+          type: string
+      required: [user, message]
+
+    RegisterInput:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        email:
+          type: string
+        password:
+          type: string
+          minLength: 6
+        role:
+          type: string
+          enum: [Admin, Student]
+      required: [name, email, password]
+
+    LoginInput:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required: [email, password]
+
+    Book:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        author:
+          type: string
+        isbn:
+          type: string
+        category:
+          type: string
+        quantity:
+          type: integer
+        availableQuantity:
+          type: integer
+        createdAt:
+          type: string
+      required: [id, title, author, isbn, category, quantity, availableQuantity, createdAt]
+
+    BookInput:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+        author:
+          type: string
+          minLength: 1
+        isbn:
+          type: string
+          minLength: 1
+        category:
+          type: string
+          minLength: 1
+        quantity:
+          type: integer
+          minimum: 1
+      required: [title, author, isbn, category, quantity]
+
+    BookUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        author:
+          type: string
+        isbn:
+          type: string
+        category:
+          type: string
+        quantity:
+          type: integer
+          minimum: 0
+
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        bookId:
+          type: integer
+        issueDate:
+          type: string
+        returnDate:
+          type: string
+        actualReturnDate:
+          type: ["string", "null"]
+        fineAmount:
+          type: ["number", "null"]
+        status:
+          type: string
+          enum: [active, returned, overdue]
+        book:
+          $ref: "#/components/schemas/Book"
+        user:
+          $ref: "#/components/schemas/User"
+      required: [id, userId, bookId, issueDate, returnDate, status, book, user]
+
+    IssueInput:
+      type: object
+      properties:
+        bookId:
+          type: integer
+        dueDays:
+          type: integer
+          minimum: 1
+          maximum: 30
+      required: [bookId]
+
+    Notification:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        message:
+          type: string
+        isRead:
+          type: boolean
+        timestamp:
+          type: string
+      required: [id, userId, message, isRead, timestamp]
+
+    AdminDashboard:
+      type: object
+      properties:
+        totalBooks:
+          type: integer
+        totalUsers:
+          type: integer
+        activeRentals:
+          type: integer
+        overdueRentals:
+          type: integer
+        totalFinesCollected:
+          type: number
+        pendingFines:
+          type: number
+        booksByCategory:
+          type: array
+          items:
+            type: object
+            properties:
+              category:
+                type: string
+              count:
+                type: integer
+            required: [category, count]
+        recentTransactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Transaction"
+      required: [totalBooks, totalUsers, activeRentals, overdueRentals, totalFinesCollected, pendingFines, booksByCategory, recentTransactions]
+
+    StudentDashboard:
+      type: object
+      properties:
+        currentlyBorrowed:
+          type: integer
+        totalBorrowed:
+          type: integer
+        outstandingFines:
+          type: number
+        overdueBooks:
+          type: integer
+        activeTransactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Transaction"
+        unreadNotifications:
+          type: integer
+      required: [currentlyBorrowed, totalBorrowed, outstandingFines, overdueBooks, activeTransactions, unreadNotifications]
