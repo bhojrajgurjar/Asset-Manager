@@ -3,6 +3,7 @@ import { useAuth, AuthProvider, ProtectedRoute } from "@/contexts/AuthContext";
 import { Link, useLocation } from "wouter";
 import { LogOut, BookOpen, Users, LayoutDashboard, Bell, Library } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ChatWidget } from "@/components/ChatWidget";
 
 function Sidebar() {
   const { user, isAdmin, logout } = useAuth();
@@ -81,6 +82,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           {children}
         </div>
       </main>
+      <ChatWidget />
     </div>
   );
 }
