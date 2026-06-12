@@ -6,6 +6,7 @@ import transactionsRouter from "./transactions";
 import usersRouter from "./users";
 import notificationsRouter from "./notifications";
 import dashboardRouter from "./dashboard";
+import chatRouter from "./chat";
 
 const router: IRouter = Router();
 
@@ -16,5 +17,6 @@ router.use("/transactions", transactionsRouter);
 router.use("/users", usersRouter);
 router.use("/notifications", notificationsRouter);
 router.use("/dashboard", dashboardRouter);
+router.use("/openai", chatRouter);
 
 export default router;
