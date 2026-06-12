@@ -93,8 +93,8 @@ export default function MyBooks() {
                           <Clock className="w-3 h-3" /> Active
                         </Badge>
                       )}
-                      {tx.fineAmount !== null && tx.fineAmount > 0 && (
-                        <div className="text-xs text-destructive mt-1 font-medium">Fine: ${tx.fineAmount.toFixed(2)}</div>
+                      {tx.fineAmount != null && tx.fineAmount > 0 && (
+                        <div className="text-xs text-destructive mt-1 font-medium">Fine: ${(tx.fineAmount as number).toFixed(2)}</div>
                       )}
                     </TableCell>
                     <TableCell className="text-right">

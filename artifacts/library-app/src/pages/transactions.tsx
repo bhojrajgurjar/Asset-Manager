@@ -72,8 +72,8 @@ export default function Transactions() {
                     {tx.status === 'overdue' && <Badge variant="secondary" className="text-destructive bg-destructive/10 gap-1"><AlertTriangle className="w-3 h-3" /> Overdue</Badge>}
                   </TableCell>
                   <TableCell className="text-right font-medium">
-                    {tx.fineAmount !== null && tx.fineAmount > 0 ? (
-                      <span className="text-destructive">${tx.fineAmount.toFixed(2)}</span>
+                    {tx.fineAmount != null && tx.fineAmount > 0 ? (
+                      <span className="text-destructive">${(tx.fineAmount as number).toFixed(2)}</span>
                     ) : (
                       <span className="text-muted-foreground">-</span>
                     )}

@@ -1,0 +1,2 @@
+- [connect-pg-simple session table](session-store.md) — `createTableIfMissing: true` does NOT auto-create the table; must create it manually before first use.
+- [Orval path-param mutations](orval-mutation-patterns.md) — Path-param mutations use `{ id }` not `{ data: { ... } }`; body mutations use `{ data: {...} }`.

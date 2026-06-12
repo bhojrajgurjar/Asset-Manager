@@ -20,9 +20,6 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Plus, Edit, Trash2, Library, BookDown } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { useToast } from "@/hooks/use-toast";
-import { useDebounce } from "@/hooks/use-mobile";
-
-// Custom useDebounce implementation since we don't have one in hooks folder
 function useDebounceValue<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
   React.useEffect(() => {
