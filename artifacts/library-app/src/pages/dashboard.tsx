@@ -1,14 +1,53 @@
 import React from "react";
+import { Link } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { 
   useGetAdminDashboard, getGetAdminDashboardQueryKey,
   useGetStudentDashboard, getGetStudentDashboardQueryKey 
 } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, Users, AlertTriangle, CheckCircle, Clock, Library, Bell } from "lucide-react";
+import { BookOpen, Users, AlertTriangle, CheckCircle, Clock, Library, Bell, DollarSign } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+
+function DashboardStatCard({
+  href,
+  title,
+  value,
+  icon: Icon,
+  iconClassName,
+  valueClassName,
+  cardClassName,
+}: {
+  href: string;
+  title: string;
+  value: React.ReactNode;
+  icon: React.ComponentType<{ className?: string }>;
+  iconClassName?: string;
+  valueClassName?: string;
+  cardClassName?: string;
+}) {
+  return (
+    <Link href={href}>
+      <Card
+        className={cn(
+          "bg-card transition-all hover:shadow-md hover:border-primary/40 cursor-pointer h-full",
+          cardClassName,
+        )}
+      >
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+          <Icon className={cn("w-4 h-4 text-primary", iconClassName)} />
+        </CardHeader>
+        <CardContent>
+          <div className={cn("text-2xl font-bold", valueClassName)}>{value}</div>
+        </CardContent>
+      </Card>
+    </Link>
+  );
+}
 
 function AdminDashboardView() {
   const { data, isLoading } = useGetAdminDashboard({
@@ -26,42 +65,33 @@ function AdminDashboardView() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Books</CardTitle>
-            <BookOpen className="w-4 h-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{data.totalBooks}</div>
-          </CardContent>
-        </Card>
-        <Card className="bg-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Active Users</CardTitle>
-            <Users className="w-4 h-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{data.totalUsers}</div>
-          </CardContent>
-        </Card>
-        <Card className="bg-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Active Rentals</CardTitle>
-            <Library className="w-4 h-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{data.activeRentals}</div>
-          </CardContent>
-        </Card>
-        <Card className="bg-card border-destructive/20">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Overdue</CardTitle>
-            <AlertTriangle className="w-4 h-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-destructive">{data.overdueRentals}</div>
-          </CardContent>
-        </Card>
+        <DashboardStatCard
+          href="/books"
+          title="Total Books"
+          value={data.totalBooks}
+          icon={BookOpen}
+        />
+        <DashboardStatCard
+          href="/users"
+          title="Active Users"
+          value={data.totalUsers}
+          icon={Users}
+        />
+        <DashboardStatCard
+          href="/transactions?filter=active"
+          title="Active Rentals"
+          value={data.activeRentals}
+          icon={Library}
+        />
+        <DashboardStatCard
+          href="/transactions?filter=overdue"
+          title="Overdue"
+          value={data.overdueRentals}
+          icon={AlertTriangle}
+          iconClassName="text-destructive"
+          valueClassName="text-destructive"
+          cardClassName="border-destructive/20"
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -131,42 +161,33 @@ function StudentDashboardView() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Currently Borrowed</CardTitle>
-            <BookOpen className="w-4 h-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{data.currentlyBorrowed}</div>
-          </CardContent>
-        </Card>
-        <Card className="bg-card border-destructive/20">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Overdue Books</CardTitle>
-            <AlertTriangle className="w-4 h-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-destructive">{data.overdueBooks}</div>
-          </CardContent>
-        </Card>
-        <Card className="bg-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Outstanding Fines</CardTitle>
-            <span className="text-muted-foreground text-sm font-bold">$</span>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">${data.outstandingFines.toFixed(2)}</div>
-          </CardContent>
-        </Card>
-        <Card className="bg-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Unread Notifications</CardTitle>
-            <Bell className="w-4 h-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{data.unreadNotifications}</div>
-          </CardContent>
-        </Card>
+        <DashboardStatCard
+          href="/my-books"
+          title="Currently Borrowed"
+          value={data.currentlyBorrowed}
+          icon={BookOpen}
+        />
+        <DashboardStatCard
+          href="/my-books?filter=overdue"
+          title="Overdue Books"
+          value={data.overdueBooks}
+          icon={AlertTriangle}
+          iconClassName="text-destructive"
+          valueClassName="text-destructive"
+          cardClassName="border-destructive/20"
+        />
+        <DashboardStatCard
+          href="/my-books?filter=fines"
+          title="Outstanding Fines"
+          value={`$${data.outstandingFines.toFixed(2)}`}
+          icon={DollarSign}
+        />
+        <DashboardStatCard
+          href="/notifications"
+          title="Unread Notifications"
+          value={data.unreadNotifications}
+          icon={Bell}
+        />
       </div>
 
       <Card>

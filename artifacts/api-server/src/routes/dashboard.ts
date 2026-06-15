@@ -95,7 +95,7 @@ router.get("/student", requireAuth, async (req, res) => {
     const [currentlyBorrowedRow] = await db
       .select({ count: sql<number>`count(*)` })
       .from(transactionsTable)
-      .where(and(eq(transactionsTable.userId, userId), eq(transactionsTable.status, "active")));
+      .where(and(eq(transactionsTable.userId, userId), sql`status IN ('active', 'overdue')`));
     const [overdueRow] = await db
       .select({ count: sql<number>`count(*)` })
       .from(transactionsTable)

@@ -9,35 +9,45 @@ import { getGetMeQueryKey } from "@workspace/api-client-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { UserPlus } from "lucide-react";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
+import { Shield, KeyRound } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AuthShell } from "@/components/layout/AuthShell";
 
-const registerSchema = z.object({
+const adminRegisterSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
+  adminPasskey: z.string().min(1, "Admin passkey is required"),
 });
 
-export default function Register() {
+export default function RegisterAdmin() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const registerMutation = useRegister();
 
-  const form = useForm<z.infer<typeof registerSchema>>({
-    resolver: zodResolver(registerSchema),
+  const form = useForm<z.infer<typeof adminRegisterSchema>>({
+    resolver: zodResolver(adminRegisterSchema),
     defaultValues: {
       name: "",
       email: "",
       password: "",
+      adminPasskey: "",
     },
   });
 
-  const onSubmit = (values: z.infer<typeof registerSchema>) => {
+  const onSubmit = (values: z.infer<typeof adminRegisterSchema>) => {
     registerMutation.mutate(
-      { data: { ...values, role: "Student" } },
+      {
+        data: {
+          name: values.name,
+          email: values.email,
+          password: values.password,
+          role: "Admin",
+          adminPasskey: values.adminPasskey,
+        },
+      },
       {
         onSuccess: (res) => {
           queryClient.setQueryData(getGetMeQueryKey(), res.user);
@@ -45,8 +55,8 @@ export default function Register() {
         },
         onError: (err: any) => {
           toast({
-            title: "Registration failed",
-            description: err.message || "An error occurred during registration.",
+            title: "Admin registration failed",
+            description: err.message || "Please check your details and passkey.",
             variant: "destructive",
           });
         },
@@ -56,10 +66,10 @@ export default function Register() {
 
   return (
     <AuthShell
-      title="Join Pustaka"
-      subtitle="Create a student account to browse and borrow books"
-      icon={UserPlus}
-      badge="Student Registration"
+      title="Admin Registration"
+      subtitle="Create an administrator account with your institution passkey"
+      icon={Shield}
+      badge="Admin Registration"
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -70,7 +80,7 @@ export default function Register() {
               <FormItem>
                 <FormLabel>Full Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="John Doe" {...field} className="bg-background" />
+                  <Input placeholder="Jane Administrator" {...field} className="bg-background" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -83,7 +93,7 @@ export default function Register() {
               <FormItem>
                 <FormLabel>Email Address</FormLabel>
                 <FormControl>
-                  <Input placeholder="student@library.com" {...field} className="bg-background" />
+                  <Input placeholder="admin@library.com" {...field} className="bg-background" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -102,25 +112,49 @@ export default function Register() {
               </FormItem>
             )}
           />
+          <FormField
+            control={form.control}
+            name="adminPasskey"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex items-center gap-2">
+                  <KeyRound className="w-4 h-4" />
+                  Admin Passkey
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="Enter institution passkey"
+                    {...field}
+                    className="bg-background"
+                  />
+                </FormControl>
+                <FormDescription>
+                  Contact your institution to obtain the admin registration passkey.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <div className="pt-2">
             <Button type="submit" className="w-full" size="lg" disabled={registerMutation.isPending}>
-              {registerMutation.isPending ? "Creating Account..." : "Create Student Account"}
+              {registerMutation.isPending ? "Creating Account..." : "Create Admin Account"}
             </Button>
           </div>
         </form>
       </Form>
 
       <div className="mt-6 text-center text-sm text-muted-foreground">
-        Already have an account?{" "}
-        <Link href="/login/user" className="text-primary font-medium hover:underline">
+        Already have an admin account?{" "}
+        <Link href="/login/admin" className="text-primary font-medium hover:underline">
           Sign in instead
         </Link>
       </div>
 
       <div className="mt-3 text-center text-sm text-muted-foreground">
-        Need an admin account?{" "}
-        <Link href="/register/admin" className="text-primary font-medium hover:underline">
-          Admin registration
+        Registering as a student?{" "}
+        <Link href="/register" className="text-primary font-medium hover:underline">
+          Student registration
         </Link>
       </div>
     </AuthShell>
