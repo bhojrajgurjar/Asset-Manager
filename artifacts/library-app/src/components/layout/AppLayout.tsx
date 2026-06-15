@@ -27,11 +27,13 @@ function Sidebar() {
 
   return (
     <div className="w-64 bg-sidebar border-r border-sidebar-border min-h-screen flex flex-col">
-      <div className="p-6 border-b border-sidebar-border flex items-center gap-3">
-        <div className="bg-primary text-primary-foreground p-2 rounded-md">
-          <BookOpen className="w-6 h-6" />
-        </div>
-        <div className="font-serif text-xl font-bold text-sidebar-foreground">Alexandria</div>
+      <div className="p-6 border-b border-sidebar-border">
+        <Link href="/dashboard" className="flex items-center gap-3 group">
+          <div className="bg-primary text-primary-foreground p-2 rounded-md transition-transform group-hover:scale-105">
+            <BookOpen className="w-6 h-6" />
+          </div>
+          <div className="font-serif text-xl font-bold text-sidebar-foreground">Pustaka</div>
+        </Link>
       </div>
       
       <div className="flex-1 py-6 px-4 flex flex-col gap-2">

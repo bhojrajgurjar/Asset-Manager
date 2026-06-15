@@ -14,4 +14,6 @@ export interface RegisterInput {
   /** @minLength 6 */
   password: string;
   role?: RegisterInputRole;
+  /** Required when registering with Admin role */
+  adminPasskey?: string;
 }

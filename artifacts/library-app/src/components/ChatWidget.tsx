@@ -23,21 +23,22 @@ export function ChatWidget() {
   const [streaming, setStreaming] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  if (!user || user.role !== "Student") return null;
+  const isStudent = user?.role === "Student";
 
   useEffect(() => {
-    if (open) {
-      setTimeout(() => inputRef.current?.focus(), 100);
-      if (!conversationId) {
-        initConversation();
-      }
+    if (!isStudent || !open) return;
+    setTimeout(() => inputRef.current?.focus(), 100);
+    if (!conversationId) {
+      initConversation();
     }
-  }, [open]);
+  }, [open, isStudent, conversationId]);
 
   useEffect(() => {
+    if (!isStudent) return;
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, isStudent]);
+
+  if (!isStudent) return null;
 
   async function initConversation() {
     try {
@@ -53,7 +54,7 @@ export function ChatWidget() {
         {
           role: "assistant",
           content:
-            "Hi! I'm Alexandria, your AI librarian 📚 Tell me what kind of books you enjoy or what you're looking for, and I'll help you find the perfect read!",
+            "Hi! I'm Pustaka AI, your friendly librarian 📚 Tell me what kind of books you enjoy or what you're looking for, and I'll help you find the perfect read!",
         },
       ]);
     } catch {
@@ -154,7 +155,7 @@ export function ChatWidget() {
             <div className="flex items-center gap-2">
               <Bot className="w-5 h-5" />
               <div>
-                <p className="font-semibold text-sm leading-tight">Alexandria AI</p>
+                <p className="font-semibold text-sm leading-tight">Pustaka AI</p>
                 <p className="text-xs opacity-75">Book recommendation assistant</p>
               </div>
             </div>

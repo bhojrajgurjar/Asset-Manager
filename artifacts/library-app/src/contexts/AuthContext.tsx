@@ -31,7 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     logoutMutation.mutate(undefined, {
       onSuccess: () => {
         queryClient.setQueryData(getGetMeQueryKey(), null);
-        setLocation("/login");
+        setLocation("/");
       }
     });
   };
@@ -60,7 +60,7 @@ export function ProtectedRoute({ children, requireAdmin = false }: { children: R
 
   useEffect(() => {
     if (!isLoading && !user) {
-      setLocation("/login");
+      setLocation("/");
     } else if (!isLoading && user && requireAdmin && !isAdmin) {
       setLocation("/dashboard");
     }

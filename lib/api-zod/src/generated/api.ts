@@ -88,7 +88,8 @@ export const RegisterBody = zod.object({
   "name": zod.string().min(1),
   "email": zod.string(),
   "password": zod.string().min(registerBodyPasswordMin),
-  "role": zod.enum(['Admin', 'Student']).optional()
+  "role": zod.enum(['Admin', 'Student']).optional(),
+  "adminPasskey": zod.string().optional().describe('Required when registering with Admin role')
 })
 
 
