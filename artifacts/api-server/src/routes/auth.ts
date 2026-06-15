@@ -14,7 +14,21 @@ router.post("/register", async (req, res) => {
     res.status(400).json({ error: "Invalid input" });
     return;
   }
-  const { name, email, password, role } = parsed.data;
+  const { name, email, password, role, adminPasskey } = parsed.data;
+  const selectedRole = role === "Admin" ? "Admin" : "Student";
+
+  if (selectedRole === "Admin") {
+    const expectedPasskey = process.env.ADMIN_REGISTRATION_PASSKEY;
+    if (!expectedPasskey) {
+      res.status(503).json({ error: "Admin registration is not configured" });
+      return;
+    }
+    if (!adminPasskey || adminPasskey !== expectedPasskey) {
+      res.status(403).json({ error: "Invalid admin passkey" });
+      return;
+    }
+  }
+
   try {
     const existing = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
     if (existing.length > 0) {
@@ -26,7 +40,7 @@ router.post("/register", async (req, res) => {
       name,
       email,
       passwordHash,
-      role: role ?? "Student",
+      role: selectedRole,
     }).returning();
     req.session.userId = user.id;
     req.session.userRole = user.role;

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useListMyTransactions, getListMyTransactionsQueryKey, useReturnBook, getGetStudentDashboardQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -9,9 +9,13 @@ import { format } from "date-fns";
 import { Clock, AlertTriangle, LibraryBig, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+import { useSearch } from "wouter";
+
 export default function MyBooks() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const search = useSearch();
+  const filter = useMemo(() => new URLSearchParams(search).get("filter"), [search]);
 
   const { data: transactions, isLoading } = useListMyTransactions({
     query: { queryKey: getListMyTransactionsQueryKey() }
@@ -34,11 +38,48 @@ export default function MyBooks() {
 
   const activeTransactions = transactions?.filter(tx => tx.status !== 'returned') || [];
 
+  const filteredTransactions = useMemo(() => {
+    if (filter === "overdue") {
+      return activeTransactions.filter(
+        (tx) => tx.status === "overdue" || new Date(tx.returnDate) < new Date(),
+      );
+    }
+    if (filter === "fines") {
+      return activeTransactions.filter((tx) => {
+        const hasFine = tx.fineAmount != null && Number(tx.fineAmount) > 0;
+        const isOverdue = tx.status === "overdue" || new Date(tx.returnDate) < new Date();
+        return hasFine || isOverdue;
+      });
+    }
+    return activeTransactions;
+  }, [activeTransactions, filter]);
+
+  const pageTitle =
+    filter === "overdue"
+      ? "Overdue Books"
+      : filter === "fines"
+        ? "Outstanding Fines"
+        : "My Books";
+
+  const pageDescription =
+    filter === "overdue"
+      ? "Books past their due date that need attention"
+      : filter === "fines"
+        ? "Borrowed titles with overdue status or accrued fines"
+        : "Manage your currently borrowed titles";
+
+  const emptyMessage =
+    filter === "overdue"
+      ? "You don't have any overdue books."
+      : filter === "fines"
+        ? "You don't have any outstanding fines right now."
+        : "You don't have any active borrowed books.";
+
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div>
-        <h1 className="text-3xl font-serif font-bold text-foreground">My Books</h1>
-        <p className="text-muted-foreground">Manage your currently borrowed titles</p>
+        <h1 className="text-3xl font-serif font-bold text-foreground">{pageTitle}</h1>
+        <p className="text-muted-foreground">{pageDescription}</p>
       </div>
 
       <div className="bg-card rounded-lg border border-border overflow-hidden shadow-sm">
@@ -59,15 +100,15 @@ export default function MyBooks() {
                   <Spinner className="w-6 h-6 text-primary mx-auto" />
                 </TableCell>
               </TableRow>
-            ) : activeTransactions.length === 0 ? (
+            ) : filteredTransactions.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
                   <LibraryBig className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                  You don't have any active borrowed books.
+                  {emptyMessage}
                 </TableCell>
               </TableRow>
             ) : (
-              activeTransactions.map((tx) => {
+              filteredTransactions.map((tx) => {
                 const isOverdue = new Date(tx.returnDate) < new Date();
                 return (
                   <TableRow key={tx.id} className="group">
@@ -93,8 +134,8 @@ export default function MyBooks() {
                           <Clock className="w-3 h-3" /> Active
                         </Badge>
                       )}
-                      {tx.fineAmount != null && tx.fineAmount > 0 && (
-                        <div className="text-xs text-destructive mt-1 font-medium">Fine: ${(tx.fineAmount as number).toFixed(2)}</div>
+                      {tx.fineAmount != null && Number(tx.fineAmount) > 0 && (
+                        <div className="text-xs text-destructive mt-1 font-medium">Fine: ${Number(tx.fineAmount).toFixed(2)}</div>
                       )}
                     </TableCell>
                     <TableCell className="text-right">

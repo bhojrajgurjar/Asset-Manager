@@ -155,6 +155,8 @@ paths:
                 $ref: "#/components/schemas/AuthResponse"
         "400":
           description: Bad request
+        "403":
+          description: Invalid admin passkey
 
   /auth/login:
     post:
@@ -554,6 +556,9 @@ components:
         role:
           type: string
           enum: [Admin, Student]
+        adminPasskey:
+          type: string
+          description: Required when registering with Admin role
       required: [name, email, password]
 
     LoginInput:

@@ -5,9 +5,12 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import { AuthProvider, ProtectedRoute, useAuth } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Spinner } from "@/components/ui/spinner";
 
+import Landing from "@/pages/landing";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
+import RegisterAdmin from "@/pages/register-admin";
 import Dashboard from "@/pages/dashboard";
 import Books from "@/pages/books/index";
 import NewBook from "@/pages/books/new";
@@ -19,16 +22,24 @@ import Users from "@/pages/users";
 
 const queryClient = new QueryClient();
 
-function RootRedirect() {
+function HomeRoute() {
   const { user, isLoading } = useAuth();
-  if (isLoading) return null;
-  return <Redirect to={user ? "/dashboard" : "/login"} />;
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Spinner className="h-8 w-8 text-primary" />
+      </div>
+    );
+  }
+  if (user) return <Redirect to="/dashboard" />;
+  return <Landing />;
 }
 
 function Router() {
   return (
     <Switch>
-      <Route path="/login" component={Login} />
+      <Route path="/login/:role" component={Login} />
+      <Route path="/register/admin" component={RegisterAdmin} />
       <Route path="/register" component={Register} />
       
       {/* Protected Routes */}
@@ -97,7 +108,7 @@ function Router() {
       </Route>
 
       <Route path="/">
-        <RootRedirect />
+        <HomeRoute />
       </Route>
       
       <Route>
